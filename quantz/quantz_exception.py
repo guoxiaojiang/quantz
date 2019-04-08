@@ -1,0 +1,2 @@
+class QuantzException(Exception):
+    pass
