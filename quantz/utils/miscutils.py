@@ -1,5 +1,6 @@
 import datetime
 
+
 def date_2_str(when):
     """
     date 对象转换为字符串"YYYYMMDD"形式
@@ -11,5 +12,14 @@ def date_2_str(when):
     else:
         raise Exception('when must be one of date,datetime or time')
 
-def today():
+
+def today_yyyymmdd_str():
+    """
+    获取今天YYYYMMDD格式的日期。
+    :return:
+    """
     return date_2_str(datetime.datetime.today())
+
+
+def today_datetime():
+    return datetime.datetime.today()

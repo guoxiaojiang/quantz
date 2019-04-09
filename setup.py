@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 from os.path import dirname, join
 from setuptools import find_packages, setup
+
 
 def read_file(file):
     with open(file, "rt") as f:
@@ -10,7 +12,6 @@ def read_file(file):
 
 with open(join(dirname(__file__), 'quantz/VERSION.txt'), 'rb') as f:
     version = f.read().decode('ascii').strip()
-
 
 setup(
     name='quantz',
@@ -25,7 +26,7 @@ setup(
     zip_safe=False,
     entry_points={
         "console_scripts": [
-            "ma888 = quantz.ma888:run"
+            "ma_filter = quantz.ma_filter_main:run"
         ]
     },
 )
