@@ -17,15 +17,12 @@ from quantz.quantz_exception import QuantzException
 from quantz.repository.quantz_repository import QuanzRepo
 from quantz.utils import miscutils
 from quantz.utils.log import *
+from quantz.utils.market_utils import get_stock_list
 
 
 def make_ts_api(token):
     # 自定义连接超时时间
     return client.DataApi(token=token, timeout=30)
-
-
-def get_stock_list(tushare_api):
-    return tushare_api.query('stock_basic', list_status='l', fields='ts_code,symbol,name,list_date')
 
 
 class MaOnTargetFitListener(OnTargetFitListener):
