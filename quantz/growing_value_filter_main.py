@@ -20,7 +20,8 @@ class OnGrowingValueFitListener(OnTargetFitListener):
 
     def on_target_fit(self, target):
         logv('on fit\n%s' % target)
-        self.repo.put_target_asset(group_id=self.group_id, code=target['ts_code'])
+        self.repo.put_target_asset(group_id=self.group_id, code=target['ts_code'], name=target['name'],
+                                   params='or_yoy=%s grossprofit_margin=%s' % (target['or_yoy'], target['grossprofit_margin']))
 
     def __init__(self,repo: QuanzRepo, when: datetime):
         if repo is None:
@@ -76,6 +77,7 @@ def run(ts_tokens, rd_exp_min, rd_exp_max, or_yoy, o_exp, gross_profit_rate):
         repo.put_group_id(when=when, policy='growing_value',
                           params='or_yoy=%s rd_exp_min=%s rd_exp_max=%s o_exp=%s gross_profit_rate=%s' % (
                               or_yoy, rd_exp_min, rd_exp_max, o_exp, gross_profit_rate))
+        logi('JOB DONE!!!!!!')
     except QuantzException as e:
         loge('Something bad happened %s' % str(e))
     sys.exit(0)

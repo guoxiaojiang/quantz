@@ -4,6 +4,7 @@
 import os
 import time
 
+import pandas as pd
 from pandas import DataFrame
 from tushare.pro import client
 
@@ -96,14 +97,17 @@ class GrowingValueFilter(object):
 
     def __filter_stock(self, stock):
         """
-        :param stock: ts_code of stcock
+        :param stock: named tuple of stock
         :return:
         """
         try:
-            report = self.__get_annual_report_at(stock, 2018)
-            # logv('Annual Report:\n%s' % report)
+            report = self.__get_annual_report_at(stock.ts_code, 2018)
+            name = pd.Series(index=['name'], data=[stock.name])
+            # logv('name:\n %s\n ' % name)
+            report = report.append(name)
+            # logv('Annual Report:\n%s\n' % report)
             if not self.__is_stock_data_valid(report):
-                logi('Invalid annual report data of %s' % stock)
+                logi('Invalid annual report data of %s' % stock.name)
                 return
             o_exp_of_gr = report['saleexp_to_gr'] + report['adminexp_of_gr'] + report['finaexp_of_gr']
             rd_exp_of_gr = 100 * report['rd_exp'] / report['total_revenue']
@@ -134,12 +138,12 @@ class GrowingValueFilter(object):
             logi('###########################################')
             self.on_target_fit_listener.on_target_fit(report)
         except QuantzException as e:
-            loge('Error getting annual for %s:%s' % (stock, e))
+            loge('Error getting annual for %s:%s' % (stock.name, e))
 
     def filter_stocks(self, stocks: DataFrame):
         if stocks is not None and stocks.shape[0] > 0:
             for stock in stocks.itertuples():
-                self.__filter_stock(stock.ts_code)
+                self.__filter_stock(stock)
                 # 每分钟最多调用接口80次 6/8 = 0.75
                 time.sleep(METHOD_INTERVAL)
             logi('Filter %d done' % os.getpid())
