@@ -9,3 +9,5 @@
 ## MongoClient 与多进程的冲突
 
 MongoClient不能通过父进程共享给子进程，每个子进程都要创建自己的MongoClient。由于MongoClient内部机制，即使父进程使用MongoClient也要在自己成创建完毕后再在父进程中创建MongoClient，否则会抛出异常`MongoClient opened before fork. Create MongoClient only` 。同时，要将创建连接的参数` connect=False`。
+
+## PyCharm 中运行代码，Click与系统编码不兼容问题

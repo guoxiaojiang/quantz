@@ -26,7 +26,8 @@ setup(
     zip_safe=False,
     entry_points={
         "console_scripts": [
-            "ma_filter = quantz.ma_filter_main:run"
+            "ma_filter = quantz.ma_filter_main:run",
+            "growing_value_filter = quantz.growing_value_filter_main:run"
         ]
     },
 )

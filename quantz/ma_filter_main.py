@@ -2,27 +2,21 @@
 # -*- coding: utf-8 -*-
 
 
-import math
 import multiprocessing as mp
 import os
 
 import click
 import pandas as pd
 import tushare as ts
-from tushare.pro import client
 
-from quantz.ma_filter import OnTargetFitListener, MaFilter
+from quantz.ma_filter import MaFilter
+from quantz.on_target_fit_listener import OnTargetFitListener
 from quantz.model.target_assets import MaTargetAsset
 from quantz.quantz_exception import QuantzException
 from quantz.repository.quantz_repository import QuanzRepo
+from quantz.utils import market_utils
 from quantz.utils import miscutils
 from quantz.utils.log import *
-from quantz.utils.market_utils import get_stock_list
-
-
-def make_ts_api(token):
-    # 自定义连接超时时间
-    return client.DataApi(token=token, timeout=30)
 
 
 class MaOnTargetFitListener(OnTargetFitListener):
@@ -32,30 +26,8 @@ class MaOnTargetFitListener(OnTargetFitListener):
 
     def on_target_fit(self, target):
         logi('Got one fit %s' % target)
-        self.repo.put_ma_target_asset(self.group_id, target[0], target[1],
-                                      target[2], target[3], target[4])
-
-
-def spit_df(df: pd.DataFrame, count: int):
-    """
-    将一个大的DataFrame平均分成count个小的DataFrame
-    :param df: 需要分割的DataFrame
-    :param count: 分割的个数
-    :return: [DataFrame] 列表
-    """
-    size = df.shape[0]
-    if size >= count:
-        piece_count = math.floor(size / count)
-        df_list = []
-        i = 1
-        while i < count:
-            df_list.append(df[(i - 1) * piece_count:i * piece_count])
-            logv('%s %s' % (((i - 1) * piece_count), (i * piece_count)))
-            i = i + 1
-        df_list.append(df[piece_count * (count - 1):])
-        return df_list
-    else:
-        raise QuantzException('Failed to split to %s pieces' % count)
+        self.repo.put_target_asset(self.group_id, target[0], target[1],
+                                      'close=%s ma=%s ma_delta=%s' % (target[2], target[3], target[4]))
 
 
 def ma_filter_func(stocks: pd.DataFrame, ts_token: str, when: datetime, freq='W', time_period=888, threshold=5):
@@ -68,26 +40,14 @@ def ma_filter_func(stocks: pd.DataFrame, ts_token: str, when: datetime, freq='W'
     """
     logv('ma_filter_func %s ts_token=%s freq=%s period=%s threshold=%s' % (
         os.getpid(), ts_token, freq, time_period, threshold))
-    ma_filter = MaFilter(make_ts_api(ts_token), MaOnTargetFitListener(QuanzRepo(), when), freq=freq,
+    ma_filter = MaFilter(miscutils.make_ts_api(ts_token), MaOnTargetFitListener(QuanzRepo(), when), freq=freq,
                          time_period=time_period, threshold=threshold)
     ma_filter.filter_stocks(stocks)
 
 
 def output_assets(assets: [MaTargetAsset]):
     for asset in assets:
-        print('%s %s %s %s %s %s' % (asset.group_id, asset.code, asset.name, asset.close, asset.ma, asset.ma_delta))
-
-
-def get_ts_token_list(config_file):
-    """
-    从配置python文件中获取tushare token
-    :param config_file: 配置Python 文件
-    :return: 两个 tushare token tuple
-    """
-    config_dir = os.path.dirname(os.path.abspath(config_file))
-    sys.path.extend([config_dir])
-    import ts_token
-    return ts_token.ts_token_list, ts_token.tmp_ts_token_list
+        print('%s %s %s %s' % (asset.group_id, asset.code, asset.name, asset.params))
 
 
 @click.command()
@@ -102,16 +62,16 @@ def run(freq, period, threshold, ts_tokens):
     """
     log_init(0)
     logi('ma filter running(freq=%s,period=%s,threshold=%s,ts_tokens=%s)' % (freq, period, threshold, ts_tokens))
-    ts_token_list, tmp_token_list = get_ts_token_list(ts_tokens)
-    ts.set_token(tmp_token_list[3])
+    ts_token_list, tmp_token_list = miscutils.get_ts_token_list(ts_tokens)
+    ts.set_token(tmp_token_list[0])
     when = miscutils.today_datetime()
     try:
         worker_count = len(ts_token_list)
-        stocks = get_stock_list(make_ts_api(tmp_token_list[0]))
+        stocks = market_utils.get_stock_list(miscutils.make_ts_api(tmp_token_list[0]))
         logv('%s stocks got' % stocks.shape[0])
         if stocks.shape[0] > 0:
             logd('%s worker process should be created here' % (len(ts_token_list)))
-        stocks_df_list = spit_df(stocks, worker_count)
+        stocks_df_list = miscutils.spit_df(stocks, worker_count)
         # 多线程
         process_list = []
         for i in range(worker_count):
@@ -124,7 +84,7 @@ def run(freq, period, threshold, ts_tokens):
         for i in range(worker_count):
             process_list[i].join()
         repo = QuanzRepo()
-        repo.put_group_id(when, freq, period, threshold)
+        repo.put_group_id(when, policy='ma', params='freq=%s period=%s threshold=%s' % (freq, period, threshold))
         output_assets(repo.get_target_assets_by_group(group_id=str(when)))
     except QuantzException as e:
         loge('Bad things happened %s' % str(e))

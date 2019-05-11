@@ -10,14 +10,10 @@ import talib as ta
 import tushare as ts
 from tushare.pro import client
 
+from quantz.on_target_fit_listener import OnTargetFitListener
 from quantz.quantz_exception import QuantzException
 from quantz.utils import miscutils
 from quantz.utils.log import *
-
-
-class OnTargetFitListener:
-    def on_target_fit(self, target):
-        raise QuantzException('You must implement a OnTargetFitListener')
 
 
 class MaFilter(object):

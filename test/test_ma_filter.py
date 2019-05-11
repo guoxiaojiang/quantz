@@ -2,7 +2,8 @@ from unittest import TestCase
 
 from tushare.pro import client
 
-from quantz.ma_filter import MaFilter, OnTargetFitListener
+from quantz.ma_filter import MaFilter
+from quantz.on_target_fit_listener import OnTargetFitListener
 from quantz.utils.log import *
 
 

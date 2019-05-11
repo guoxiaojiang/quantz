@@ -22,28 +22,26 @@ class QuanzRepo(object):
         pass
 
     @staticmethod
-    def put_group_id(when: date, freq, period, threshold):
+    def put_group_id(when: date, policy='undefined', params='undefined'):
         """
         将股票的group id存入数据库
         :param when:
         :return:
         """
-        MaTargetAssetGroup(group_id=str(when), when=when, freq=freq, period=period, threshold=threshold).save()
+        MaTargetAssetGroup(group_id=str(when), when=when, policy=policy, params=params).save()
 
     @staticmethod
-    def put_ma_target_asset(group_id: str, code: str,
-                            name: str, close: float, ma: float, ma_delta: float):
+    def put_target_asset(group_id: str= 'undefined', code: str= 'undefined',
+                         name: str='undefined', params: str='undefined'):
         """
         保存选中的股票到数据库。
         :param group_id: 组id
         :param code: 选中的股票代码+.SH/SZ
         :param name: 选中的股票名字
-        :param close: 收盘价
-        :param ma: 均线位置
-        :param ma_delta: 收盘价与均线差值的百分比
+        :param params: 选股的参数值
         :return: None
         """
-        MaTargetAsset(group_id=group_id, code=code, name=name, close=close, ma=ma, ma_delta=ma_delta).save()
+        MaTargetAsset(group_id=group_id, code=code, name=name, params=params).save()
 
     @staticmethod
     def get_target_assets_by_group(group_id: str):
