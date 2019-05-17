@@ -56,7 +56,7 @@ class GrowingValueFilter(object):
         period = '%s1231' % year
         fina = None
         income = None
-        while count > 0:
+        while count > 0 and fina is None:
             try:
                 count = count - 1
                 fina = self.ts_api.query('fina_indicator', ts_code=ts_code,
@@ -64,27 +64,35 @@ class GrowingValueFilter(object):
                                          fields='ts_code, end_date, or_yoy,'
                                                 'roe_dt, grossprofit_margin, profit_to_gr, saleexp_to_gr,adminexp_of_gr,finaexp_of_gr,rd_exp')
             except Exception as e:
-                loge(str(e))
-                logi('Failing getting fina indicators for %s, retrying' % ts_code)
-            finally:
-                pass
+                loge('%s' % str(e))
+                loge('Failing getting fina indicators for %s, retrying' % ts_code)
+            if fina is None:
+                time.sleep(METHOD_INTERVAL)
+        count = 10
+        while count > 0 and income is None:
+            count = count - 1
             try:
                 income = self.ts_api.query('income', ts_code=ts_code,
                                            period=period,
                                            fields='ts_code, total_revenue, revenue')
             except Exception as e:
-                loge(str(e))
-                logi('Failing getting incomes for %s, retrying' % ts_code)
-            finally:
-                pass
-            if fina is None or income is None:
-                continue
-            if fina.shape[0] == 1 and income.shape[0] == 1:
-                report = fina.merge(income)
-                logi('Got report for %s' % ts_code)
-                return report.iloc[0]
-            time.sleep(METHOD_INTERVAL)
-        raise QuantzException('Failed to get annual report for %s @%s' % (ts_code, year))
+                loge('%s' % str(e))
+                loge('Failing getting incomes for %s, retrying' % ts_code)
+            if income is None:
+                time.sleep(METHOD_INTERVAL)
+            else:
+                # 有时年报收入数据会拿到两条一样的数据，只保留第一条既可
+                income = income[0:1]
+        if fina is None or income is None:
+            raise QuantzException('Failed to get annual report for %s @%s' % (ts_code, year))
+        if fina.shape[0] == 1 and income.shape[0] == 1:
+            report = fina.merge(income)
+            logi('Got report for %s' % ts_code)
+            return report.iloc[0]
+        else:
+            loge('Got Invalid report data')
+            loge('fina:\n%s' % fina)
+            loge('income:\n%s' % income)
 
     def __is_stock_data_valid(self, annual_report):
         if annual_report['saleexp_to_gr'] is not None \
