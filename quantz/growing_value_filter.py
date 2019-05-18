@@ -68,6 +68,9 @@ class GrowingValueFilter(object):
                 loge('Failing getting fina indicators for %s, retrying' % ts_code)
             if fina is None:
                 time.sleep(METHOD_INTERVAL)
+            else:
+                # 有时年报财务数据会拿到两条一样的数据，只保留第一条既可
+                fina = fina[0:1]
         count = 10
         while count > 0 and income is None:
             count = count - 1
