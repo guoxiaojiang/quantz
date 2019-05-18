@@ -41,11 +41,12 @@ before_install:
   - conda install -c intel mkl_fft mkl_random
   - conda install hdf5 mock pytables
   - conda install -c anaconda line_profiler
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then conda install -c conda-forge bcolz; fi;
 
 install:
-  - pip install .
-
-after_install:
   - conda update -y -v -v -v --all
 
-script: make tests
+# after_install:
+
+script:
+ - pip install .
