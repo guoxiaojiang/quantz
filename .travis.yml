@@ -44,7 +44,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then conda install -c conda-forge bcolz; fi;
 
 install:
-  - conda update -y -v -v -v --all
+  - conda update -y -v --all
 
 # after_install:
 
