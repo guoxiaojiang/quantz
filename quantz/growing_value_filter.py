@@ -10,6 +10,7 @@ from tushare.pro import client
 
 from quantz.quantz_exception import QuantzException
 from quantz.utils.log import *
+from quantz.utils import miscutils
 from quantz.on_target_fit_listener import OnTargetFitListener
 
 METHOD_INTERVAL = 0.74
@@ -45,7 +46,7 @@ class GrowingValueFilter(object):
         self.o_exp = o_exp
         self.gpr = gpr
 
-    def __get_annual_report_at(self, ts_code, year):
+    def __get_annual_report_at(self, ts_code):
         """
         Get data for filtering
         :param ts_code: stock number
@@ -53,7 +54,8 @@ class GrowingValueFilter(object):
         :return: DataFrame
         """
         count = 10
-        period = '%s1231' % year
+        # period = '%s1231' % year
+        period = miscutils.generate_latest_report_period()
         fina = None
         income = None
         while count > 0 and fina is None:
@@ -102,7 +104,8 @@ class GrowingValueFilter(object):
                 and annual_report['adminexp_of_gr'] is not None \
                 and annual_report['finaexp_of_gr'] is not None \
                 and annual_report['rd_exp'] is not None \
-                and annual_report['total_revenue'] is not None:
+                and annual_report['total_revenue'] is not None \
+                and annual_report['or_yoy'] is not None:
             return True
         return False
 
@@ -112,7 +115,7 @@ class GrowingValueFilter(object):
         :return:
         """
         try:
-            report = self.__get_annual_report_at(stock.ts_code, 2018)
+            report = self.__get_annual_report_at(stock.ts_code)
             name = pd.Series(index=['name'], data=[stock.name])
             # logv('name:\n %s\n ' % name)
             report = report.append(name)

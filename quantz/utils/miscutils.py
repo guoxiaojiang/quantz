@@ -1,4 +1,5 @@
 import datetime
+from datetime import timedelta
 import math
 import os
 import sys
@@ -74,4 +75,14 @@ def spit_df(df: pd.DataFrame, count: int):
 def make_ts_api(token):
     # 自定义连接超时时间
     return client.DataApi(token=token, timeout=30)
+
+
+def generate_latest_report_period():
+    """
+    根据当前日期生成最近的报表季时间
+    """
+    now = datetime.now()
+    month = (now.month - 1) - (now.month - 1) % 3 + 1
+    last_quarter_end = datetime(now.year, month, 1) - timedelta(days=1)
+    return (last_quarter_end.strftime("%Y%m%d"))
 
