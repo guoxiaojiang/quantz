@@ -2,6 +2,7 @@ import datetime
 from datetime import timedelta
 import math
 import os
+import re
 import sys
 
 import pandas as pd
@@ -86,3 +87,15 @@ def generate_latest_report_period():
     last_quarter_end = datetime(now.year, month, 1) - timedelta(days=1)
     return (last_quarter_end.strftime("%Y%m%d"))
 
+def is_valid_report_end_date(end_date: str = None):
+    if end_date is None:
+        return False
+    elif re.match('[0-9]{6}3[01]', end_date) is not None:
+        if not end_date[4:] in ('0331', '0630', '0930', '1231'):
+            return False
+        else:
+            if int(end_date[0:4]) <= int(today_yyyymmdd_str()[0:4]):
+                return True
+            return False
+    else:
+        return False

@@ -29,7 +29,7 @@ class GrowingValueFilter(object):
 
     def __init__(self, ts_api: client.DataApi, on_target_fit_listener:OnTargetFitListener,
                  or_yoy: float = 30, rd_exp_min: float = 10, rd_exp_max: float = 30,
-                 o_exp: float = 20, gpr: float = 40):
+                 o_exp: float = 20, gpr: float = 40, end_date: str = None):
         """
         :param or_yoy Operating Revenue Year over Year，营业收入增长率(非营业总收入)
         :param rd_exp R & D 研发投入比例最低值
@@ -45,6 +45,11 @@ class GrowingValueFilter(object):
         self.rd_exp_max = rd_exp_max
         self.o_exp = o_exp
         self.gpr = gpr
+        if miscutils.is_valid_report_end_date(end_date):
+            self.end_date = end_date
+        else:
+            loge('Invalid report period,using last report period')
+            self.end_date = miscutils.generate_latest_report_period()
 
     def __get_annual_report_at(self, ts_code):
         """
@@ -55,7 +60,7 @@ class GrowingValueFilter(object):
         """
         count = 10
         # period = '%s1231' % year
-        period = miscutils.generate_latest_report_period()
+        period = self.end_date
         fina = None
         income = None
         while count > 0 and fina is None:
@@ -88,18 +93,19 @@ class GrowingValueFilter(object):
             else:
                 # 有时年报收入数据会拿到两条一样的数据，只保留第一条既可
                 income = income[0:1]
-        if fina is None or income is None:
-            raise QuantzException('Failed to get annual report for %s @%s' % (ts_code, year))
+        if fina is None or income is None or fina.empty:
+            raise QuantzException('Failed to get annual report for %s @%s' % (ts_code, period))
         if fina.shape[0] == 1 and income.shape[0] == 1:
             report = fina.merge(income)
             logi('Got report for %s' % ts_code)
             return report.iloc[0]
         else:
             loge('Got Invalid report data')
-            loge('fina:\n%s' % fina)
-            loge('income:\n%s' % income)
+            raise QuantzException('Invalid report got for %s @%s' % (ts_code, period))
 
     def __is_stock_data_valid(self, annual_report):
+        if annual_report is None or annual_report.empty:
+            return False
         if annual_report['saleexp_to_gr'] is not None \
                 and annual_report['adminexp_of_gr'] is not None \
                 and annual_report['finaexp_of_gr'] is not None \
@@ -117,8 +123,9 @@ class GrowingValueFilter(object):
         try:
             report = self.__get_annual_report_at(stock.ts_code)
             name = pd.Series(index=['name'], data=[stock.name])
-            # logv('name:\n %s\n ' % name)
+            end_date = pd.Series(index=['end_date'], data=[self.end_date])
             report = report.append(name)
+            report = report.append(end_date)
             # logv('Annual Report:\n%s\n' % report)
             if not self.__is_stock_data_valid(report):
                 logi('Invalid annual report data of %s' % stock.name)
