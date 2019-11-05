@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/zhangyuz/quantz.svg?token=Dy7SZxVytRKD6vwS4HXe&branch=master)](https://travis-ci.com/zhangyuz/quantz)
+[![Build Status](https://travis-ci.com/zhangyuz/quantz.svg?token=Dy7SZxVytRKD6vwS4HXe&branch=master)](https://travis-ci.com/zhangyuz/quantz)     [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## 安装
 
