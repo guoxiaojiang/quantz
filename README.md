@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/zhangyuz/quantz.svg?token=Dy7SZxVytRKD6vwS4HXe&branch=master)](https://travis-ci.com/zhangyuz/quantz)     [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://travis-ci.com/zhangyuz/quantz.svg?token=Dy7SZxVytRKD6vwS4HXe&branch=master)](https://travis-ci.com/zhangyuz/quantz)     [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)     [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c8a2783a237949db9865259119e0fe56)](https://www.codacy.com/manual/leran0222/quantz?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zhangyuz/quantz&amp;utm_campaign=Badge_Grade)
 
 ## 安装
 
