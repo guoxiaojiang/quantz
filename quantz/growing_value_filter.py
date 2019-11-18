@@ -122,11 +122,8 @@ class GrowingValueFilter(object):
         """
         try:
             report = self.__get_annual_report_at(stock.ts_code)
-            name = pd.Series(index=['name'], data=[stock.name])
-            end_date = pd.Series(index=['end_date'], data=[self.end_date])
-            report = report.append(name)
-            report = report.append(end_date)
-            # logv('Annual Report:\n%s\n' % report)
+            to_apd = pd.Series(index=['name'], data=[stock.name])
+            report = report.append(to_apd)
             if not self.__is_stock_data_valid(report):
                 logi('Invalid annual report data of %s' % stock.name)
                 return
@@ -149,14 +146,6 @@ class GrowingValueFilter(object):
             if o_exp_of_gr + rd_exp_of_gr > report['grossprofit_margin']:
                 logi('%s not qualified, 三费+研发投入(%s) > 毛利率(%s)' % (report['ts_code'], (o_exp_of_gr+rd_exp_of_gr), report['grossprofit_margin']))
                 return
-            # if report['or_yoy'] >= self.or_yoy \
-            #         and rd_exp_of_gr >= self.rd_exp_min and rd_exp_of_gr <= self.rd_exp_max \
-            #         and o_exp_of_gr <= self.o_exp \
-            #         and report['grossprofit_margin'] >= self.gpr \
-            #         and o_exp_of_gr + rd_exp_of_gr <= report['grossprofit_margin']:
-            logi('###########################################')
-            logi('Got one %s' % report)
-            logi('###########################################')
             self.on_target_fit_listener.on_target_fit(report)
         except QuantzException as e:
             loge('Error getting annual for %s:%s' % (stock.name, e))

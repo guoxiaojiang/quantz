@@ -19,9 +19,11 @@ from quantz.utils.log import *
 class OnGrowingValueFitListener(OnTargetFitListener):
 
     def on_target_fit(self, target):
-        logv('on fit\n%s' % target)
+        logv('#############################')
+        logv('On Fit\n%s' % (target))
         self.repo.put_target_asset(group_id=self.group_id, code=target['ts_code'], name=target['name'],
-                                   params='or_yoy=%s grossprofit_margin=%s end_date=%s' % (target['or_yoy'], target['grossprofit_margin'], target['end_date']))
+                                   params='or_yoy=%s grossprofit_margin=%s end_date=%s' % \
+                                       (target['or_yoy'], target['grossprofit_margin'], target['end_date']))
 
     def __init__(self,repo: QuanzRepo, when: datetime):
         if repo is None:

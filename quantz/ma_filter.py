@@ -48,15 +48,16 @@ class MaFilter(object):
         while not done and count > 0:
             count = count - 1
             try:
-                daily_close = ts.pro_bar(pro_api=self.tushare_api, ts_code=ts_code, start_date=start_date,
+                daily_close = ts.pro_bar(api=self.tushare_api, ts_code=ts_code, start_date=start_date,
                                          end_date=end_date,
                                          asset='E', freq=self.freq, adj='qfq')
                 done = True
             except Exception as e:
                 loge(str(e))
                 done = False
-                time.sleep(0.31)
+                time.sleep(0.501)
                 logi('Retrying get close price for ' + ts_code)
+                logi('try %d' % (10 - count))
             finally:
                 pass
         if daily_close is None:
@@ -108,8 +109,8 @@ class MaFilter(object):
                     logi(row.name + ':' + str(ma_delta))
                     if abs(ma_delta) <= self.threshold:
                         self.__on_target_fit(row.ts_code, row.name, daily_close[0], ma_val, ma_delta)
-                    # 由于获取日线数据的函数每分钟最多调用200次，所以，每次sleep 0.31秒，保证每分钟调用此函数不会超过200次
-                    time.sleep(0.301)
+                    # 由于获取日线数据的函数每分钟最多调用120次，所以，每次sleep 0.31秒，保证每分钟调用此函数不会超过200次
+                    time.sleep(0.501)
                 except QuantzException as e:
                     logw(str(e))
         else:
