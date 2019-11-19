@@ -9,7 +9,9 @@ from pandas import DataFrame
 from tushare.pro import client
 
 from quantz.quantz_exception import QuantzException
-from quantz.utils.log import *
+from quantz.utils.log import logv
+from quantz.utils.log import loge
+from quantz.utils.log import logi
 from quantz.utils import miscutils
 from quantz.on_target_fit_listener import OnTargetFitListener
 
@@ -27,7 +29,7 @@ class GrowingValueFilter(object):
     处于信息技术、物联网、芯片、5G、智能硬件、车载、医疗领域
     """
 
-    def __init__(self, ts_api: client.DataApi, on_target_fit_listener:OnTargetFitListener,
+    def __init__(self, ts_api: client.DataApi, on_target_fit_listener: OnTargetFitListener,
                  or_yoy: float = 30, rd_exp_min: float = 10, rd_exp_max: float = 30,
                  o_exp: float = 20, gpr: float = 40, end_date: str = None):
         """
@@ -94,14 +96,16 @@ class GrowingValueFilter(object):
                 # 有时年报收入数据会拿到两条一样的数据，只保留第一条既可
                 income = income[0:1]
         if fina is None or income is None or fina.empty:
-            raise QuantzException('Failed to get annual report for %s @%s' % (ts_code, period))
+            raise QuantzException(
+                'Failed to get annual report for %s @%s' % (ts_code, period))
         if fina.shape[0] == 1 and income.shape[0] == 1:
             report = fina.merge(income)
             logi('Got report for %s' % ts_code)
             return report.iloc[0]
         else:
             loge('Got Invalid report data')
-            raise QuantzException('Invalid report got for %s @%s' % (ts_code, period))
+            raise QuantzException(
+                'Invalid report got for %s @%s' % (ts_code, period))
 
     def __is_stock_data_valid(self, annual_report):
         if annual_report is None or annual_report.empty:
@@ -127,24 +131,30 @@ class GrowingValueFilter(object):
             if not self.__is_stock_data_valid(report):
                 logi('Invalid annual report data of %s' % stock.name)
                 return
-            o_exp_of_gr = report['saleexp_to_gr'] + report['adminexp_of_gr'] + report['finaexp_of_gr']
+            o_exp_of_gr = report['saleexp_to_gr'] + \
+                report['adminexp_of_gr'] + report['finaexp_of_gr']
             rd_exp_of_gr = 100 * report['rd_exp'] / report['total_revenue']
-            logv('or_yoy=%s rd_exp_of_gr=%s o_exp_of_gr=%s grossprofit=%s' % \
+            logv('or_yoy=%s rd_exp_of_gr=%s o_exp_of_gr=%s grossprofit=%s' %
                  (report['or_yoy'], rd_exp_of_gr, o_exp_of_gr, report['grossprofit_margin']))
             if report['or_yoy'] < self.or_yoy:
-                logi('%s not qualified, or_yoy(营业收入增速) %s < %s' % (report['ts_code'], report['or_yoy'], self.or_yoy))
+                logi('%s not qualified, or_yoy(营业收入增速) %s < %s' %
+                     (report['ts_code'], report['or_yoy'], self.or_yoy))
                 return
             if rd_exp_of_gr < self.rd_exp_min or rd_exp_of_gr > self.rd_exp_max:
-                logi('%s not qualified, rd_exp(研发投入) %s not between(%s %s)' % (report['ts_code'], rd_exp_of_gr, self.rd_exp_min, self.rd_exp_max))
+                logi('%s not qualified, rd_exp(研发投入) %s not between(%s %s)' % (
+                    report['ts_code'], rd_exp_of_gr, self.rd_exp_min, self.rd_exp_max))
                 return
             if o_exp_of_gr > self.o_exp:
-                logi('%s not qualified, o_exp(三费总和) %s > %s' % (report['ts_code'], o_exp_of_gr, self.o_exp))
+                logi('%s not qualified, o_exp(三费总和) %s > %s' %
+                     (report['ts_code'], o_exp_of_gr, self.o_exp))
                 return
             if report['grossprofit_margin'] < self.gpr:
-                logi('%s not qualified, grossprofit(毛利率) %s < %s' % (report['ts_code'], report['grossprofit_margin'], self.gpr))
+                logi('%s not qualified, grossprofit(毛利率) %s < %s' %
+                     (report['ts_code'], report['grossprofit_margin'], self.gpr))
                 return
             if o_exp_of_gr + rd_exp_of_gr > report['grossprofit_margin']:
-                logi('%s not qualified, 三费+研发投入(%s) > 毛利率(%s)' % (report['ts_code'], (o_exp_of_gr+rd_exp_of_gr), report['grossprofit_margin']))
+                logi('%s not qualified, 三费+研发投入(%s) > 毛利率(%s)' %
+                     (report['ts_code'], (o_exp_of_gr+rd_exp_of_gr), report['grossprofit_margin']))
                 return
             self.on_target_fit_listener.on_target_fit(report)
         except QuantzException as e:

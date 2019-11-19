@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 class GridTrading(object):
     def __init__(self):
         pass

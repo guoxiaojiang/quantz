@@ -27,7 +27,8 @@ class MaFilter(object):
         :param threshold: 选股门限
         """
         if not isinstance(tushare_api, client.DataApi):
-            raise QuantzException('Wrong type of tushare_api, tushare.client.DataApi expected!!!')
+            raise QuantzException(
+                'Wrong type of tushare_api, tushare.client.DataApi expected!!!')
         self.tushare_api = tushare_api
         self.on_target_fit_listener = on_target_fit_listener
         self.freq = freq
@@ -87,7 +88,8 @@ class MaFilter(object):
 
     def __on_target_fit(self, ts_code, name, close, ma_val, ma_delta):
         logi('%s fit(%f) ' % (name, ma_delta))
-        self.on_target_fit_listener.on_target_fit([ts_code, name, close, ma_val, ma_delta])
+        self.on_target_fit_listener.on_target_fit(
+            [ts_code, name, close, ma_val, ma_delta])
 
     def filter_stocks(self, stocks: pd.DataFrame):
         """
@@ -108,7 +110,8 @@ class MaFilter(object):
                     ma_delta = (daily_close[0] - ma_val) / daily_close[0]
                     logi(row.name + ':' + str(ma_delta))
                     if abs(ma_delta) <= self.threshold:
-                        self.__on_target_fit(row.ts_code, row.name, daily_close[0], ma_val, ma_delta)
+                        self.__on_target_fit(
+                            row.ts_code, row.name, daily_close[0], ma_val, ma_delta)
                     # 由于获取日线数据的函数每分钟最多调用120次，所以，每次sleep 0.31秒，保证每分钟调用此函数不会超过200次
                     time.sleep(0.501)
                 except QuantzException as e:

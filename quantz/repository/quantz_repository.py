@@ -28,11 +28,12 @@ class QuanzRepo(object):
         :param when:
         :return:
         """
-        MaTargetAssetGroup(group_id=str(when), when=when, policy=policy, params=params).save()
+        MaTargetAssetGroup(group_id=str(when), when=when,
+                           policy=policy, params=params).save()
 
     @staticmethod
-    def put_target_asset(group_id: str= 'undefined', code: str= 'undefined',
-                         name: str='undefined', params: str='undefined'):
+    def put_target_asset(group_id: str = 'undefined', code: str = 'undefined',
+                         name: str = 'undefined', params: str = 'undefined'):
         """
         保存选中的股票到数据库。
         :param group_id: 组id
@@ -41,7 +42,8 @@ class QuanzRepo(object):
         :param params: 选股的参数值
         :return: None
         """
-        MaTargetAsset(group_id=group_id, code=code, name=name, params=params).save()
+        MaTargetAsset(group_id=group_id, code=code,
+                      name=name, params=params).save()
 
     @staticmethod
     def get_target_assets_by_group(group_id: str):

@@ -30,7 +30,8 @@ class TushareTest(TestCase):
         for row in income.itertuples():
             print(row)
 
-        result = fina.set_index('end_date').merge(income, how='left', left_index=True, right_index=True)
+        result = fina.set_index('end_date').merge(
+            income, how='left', left_index=True, right_index=True)
         for row in result.itertuples():
             print(row)
 

@@ -27,7 +27,7 @@ class MaOnTargetFitListener(OnTargetFitListener):
     def on_target_fit(self, target):
         logi('Got one fit %s' % target)
         self.repo.put_target_asset(self.group_id, target[0], target[1],
-                                      'close=%s ma=%s ma_delta=%s' % (target[2], target[3], target[4]))
+                                   'close=%s ma=%s ma_delta=%s' % (target[2], target[3], target[4]))
 
 
 def ma_filter_func(stocks: pd.DataFrame, ts_token: str, when: datetime, freq='W', time_period=888, threshold=5):
@@ -47,7 +47,8 @@ def ma_filter_func(stocks: pd.DataFrame, ts_token: str, when: datetime, freq='W'
 
 def output_assets(assets: [MaTargetAsset]):
     for asset in assets:
-        print('%s %s %s %s' % (asset.group_id, asset.code, asset.name, asset.params))
+        print('%s %s %s %s' %
+              (asset.group_id, asset.code, asset.name, asset.params))
 
 
 @click.command()
@@ -61,16 +62,19 @@ def run(freq, period, threshold, ts_tokens):
     简单的均线选股小程序。
     """
     log_init(0)
-    logi('ma filter running(freq=%s,period=%s,threshold=%s,ts_tokens=%s)' % (freq, period, threshold, ts_tokens))
+    logi('ma filter running(freq=%s,period=%s,threshold=%s,ts_tokens=%s)' %
+         (freq, period, threshold, ts_tokens))
     ts_token_list, tmp_token_list = miscutils.get_ts_token_list(ts_tokens)
     ts.set_token(tmp_token_list[0])
     when = miscutils.today_datetime()
     try:
         worker_count = len(ts_token_list)
-        stocks = market_utils.get_stock_list(miscutils.make_ts_api(tmp_token_list[0]))
+        stocks = market_utils.get_stock_list(
+            miscutils.make_ts_api(tmp_token_list[0]))
         logv('%s stocks got' % stocks.shape[0])
         if stocks.shape[0] > 0:
-            logd('%s worker process should be created here' % (len(ts_token_list)))
+            logd('%s worker process should be created here' %
+                 (len(ts_token_list)))
         stocks_df_list = miscutils.spit_df(stocks, worker_count)
         # 多线程
         process_list = []
@@ -84,7 +88,8 @@ def run(freq, period, threshold, ts_tokens):
         for i in range(worker_count):
             process_list[i].join()
         repo = QuanzRepo()
-        repo.put_group_id(when, policy='ma', params='freq=%s period=%s threshold=%s' % (freq, period, threshold))
+        repo.put_group_id(when, policy='ma', params='freq=%s period=%s threshold=%s' % (
+            freq, period, threshold))
         output_assets(repo.get_target_assets_by_group(group_id=str(when)))
     except QuantzException as e:
         loge('Bad things happened %s' % str(e))

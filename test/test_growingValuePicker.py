@@ -15,7 +15,7 @@ class OnGrowingValueFitListener(OnTargetFitListener):
         self.repo.put_target_asset(group_id=self.group_id,
                                    code=target['ts_code'])
 
-    def __init__(self,repo: QuanzRepo, when: datetime):
+    def __init__(self, repo: QuanzRepo, when: datetime):
         self.repo = repo
         self.group_id = str(when)
 
@@ -25,11 +25,12 @@ class GrowingValuePickerTest(TestCase):
     def setUp(self) -> None:
         log_init(0)
         self.ts_api = client.DataApi(miscutils.get_ts_token_from_env())
-        self.picker = GrowingValueFilter(self.ts_api,OnGrowingValueFitListener(QuanzRepo(), datetime.now()),
+        self.picker = GrowingValueFilter(self.ts_api, OnGrowingValueFitListener(QuanzRepo(), datetime.now()),
                                          or_yoy=10, rd_exp_min=1, rd_exp_max=30, o_exp=80, gpr=10)
 
     def test_get_annual_report_at(self):
-        report = self.picker._GrowingValuePicker__get_annual_report_at('300122.SZ', 2018)
+        report = self.picker._GrowingValuePicker__get_annual_report_at(
+            '300122.SZ', 2018)
         logi(report)
 
     def test_filter_stock(self):

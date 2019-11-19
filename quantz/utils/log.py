@@ -40,4 +40,5 @@ def logw(*msg):
 
 def loge(*msg):
     if __log_level__ <= LEVEL_E:
-        print(datetime.now().strftime('%Y%m%d-%H%M%S.%f') + 'E:%s' % msg, file=sys.stderr)
+        print(datetime.now().strftime('%Y%m%d-%H%M%S.%f') + 'E:%s' %
+              msg, file=sys.stderr)

@@ -73,6 +73,7 @@ def spit_df(df: pd.DataFrame, count: int):
     else:
         raise QuantzException('Failed to split to %s pieces' % count)
 
+
 def make_ts_api(token):
     # 自定义连接超时时间
     return client.DataApi(token=token, timeout=30)
@@ -86,6 +87,7 @@ def generate_latest_report_period():
     month = (now.month - 1) - (now.month - 1) % 3 + 1
     last_quarter_end = datetime(now.year, month, 1) - timedelta(days=1)
     return (last_quarter_end.strftime("%Y%m%d"))
+
 
 def is_valid_report_end_date(end_date: str = None):
     if end_date is None:
